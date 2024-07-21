@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 
-from modal import trainer
+from model import trainer
 import torch
 
 parser = argparse.ArgumentParser()

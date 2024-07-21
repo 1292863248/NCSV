@@ -3,7 +3,7 @@ import torch.nn as nn
 from transformers import BertModel
 
 from AltClip import AltCLIP
-from modal.coattention import co_attention
+from model.coattention import co_attention
 
 
 class bert_base_chinese(nn.Module):

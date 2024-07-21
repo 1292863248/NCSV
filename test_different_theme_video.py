@@ -7,11 +7,11 @@ from sklearn.metrics import roc_auc_score, f1_score, recall_score, precision_sco
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from modal import trainer
+from model import trainer
 import torch
 
-from modal.dataset import NCSVDataset, collect_fn
-from modal.ncsv import NCSV
+from model.dataset import NCSVDataset, collect_fn
+from model.ncsv import NCSV
 
 
 def test_four_theme_video(**kwargs):
