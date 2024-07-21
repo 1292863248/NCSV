@@ -42,5 +42,5 @@ if __name__ == '__main__':
     output_folder = './video_frames'  # 输出文件夹路径
     video_names = os.listdir(video_path)
     for video_name in tqdm(video_names):
-        if video_name.split('.')[0] == "mp4":
+        if video_name.split('.')[-1] == "mp4":
             extract_images(video_path + '/' + video_name, output_folder)
