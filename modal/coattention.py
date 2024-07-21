@@ -1,8 +1,9 @@
-
 import torch.nn as nn
 import torch.nn.init as init
 import torch
 import numpy as np
+
+
 class Linear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
         super(Linear, self).__init__()
@@ -30,10 +31,10 @@ class ScaledDotProductAttention(nn.Module):
         scores = torch.matmul(q, k.transpose(-1, -2)) / self.scale_factor
         if attn_mask is not None:
             #
-            #assert attn_mask.size() == scores.size()
-            #取反，原本的atten中0表示mask，取反后使用masked_fill_将1的位置填充
-            attn_mask=torch.where(attn_mask>0,torch.tensor(0),torch.tensor(1))
-            attn_mask=attn_mask.unsqueeze(1).unsqueeze(2)#(B,1,1,len_k)
+            # assert attn_mask.size() == scores.size()
+            # 取反，原本的atten中0表示mask，取反后使用masked_fill_将1的位置填充
+            attn_mask = torch.where(attn_mask > 0, torch.tensor(0), torch.tensor(1))
+            attn_mask = attn_mask.unsqueeze(1).unsqueeze(2)  # (B,1,1,len_k)
             scores.masked_fill_(attn_mask.bool(), -1e9)
         attn = self.dropout(self.softmax(scores))
 
@@ -41,7 +42,6 @@ class ScaledDotProductAttention(nn.Module):
         context = torch.matmul(attn, v)
 
         return context, attn
-
 
 
 class LayerNormalization(nn.Module):
@@ -52,8 +52,8 @@ class LayerNormalization(nn.Module):
         self.eps = eps
 
     def forward(self, z):
-        mean = z.mean(dim=-1, keepdim=True,)
-        std = z.std(dim=-1, keepdim=True,)
+        mean = z.mean(dim=-1, keepdim=True, )
+        std = z.std(dim=-1, keepdim=True, )
         ln_out = (z - mean) / (std + self.eps)
         ln_out = self.gamma * ln_out + self.beta
 
@@ -65,7 +65,7 @@ class PosEncoding(nn.Module):
         super(PosEncoding, self).__init__()
         pos_enc = np.array(
             [[pos / np.power(10000, 2.0 * (j // 2) / d_word_vec) for j in range(d_word_vec)]
-            for pos in range(max_seq_len)])
+             for pos in range(max_seq_len)])
         pos_enc[:, 0::2] = np.sin(pos_enc[:, 0::2])
         pos_enc[:, 1::2] = np.cos(pos_enc[:, 1::2])
         pad_row = np.zeros([1, d_word_vec])
@@ -75,12 +75,14 @@ class PosEncoding(nn.Module):
         self.pos_enc = nn.Embedding(max_seq_len + 1, d_word_vec)
         # fix positional encoding: exclude weight from grad computation
         self.pos_enc.weight = nn.Parameter(torch.from_numpy(pos_enc), requires_grad=False)
-        self.max_len = int(max_seq_len/10)
+        self.max_len = int(max_seq_len / 10)
+
     def forward(self, input_len):
-        max_len = self.max_len            # torch.max(input_len)
+        max_len = self.max_len  # torch.max(input_len)
         tensor = torch.cuda.LongTensor if input_len.is_cuda else torch.LongTensor
-        input_pos = tensor([list(range(1, len+1)) + [0]*(max_len-len) for len in input_len])
+        input_pos = tensor([list(range(1, len + 1)) + [0] * (max_len - len) for len in input_len])
         return self.pos_enc(input_pos)
+
 
 class GetQKV(nn.Module):
     def __init__(self, d_k, d_v, d_model, n_heads, dropout):
@@ -108,6 +110,7 @@ class GetQKV(nn.Module):
         v_s = self.w_v(v).view(b_size, -1, self.n_heads, self.d_v).transpose(1, 2)
         return q_s, k_s, v_s
 
+
 class PoswiseFeedForwardNet(nn.Module):
     def __init__(self, d_model, d_ff, dropout=0.1):
         super(PoswiseFeedForwardNet, self).__init__()
@@ -128,6 +131,7 @@ class PoswiseFeedForwardNet(nn.Module):
 
         return self.layer_norm(residual + output)
 
+
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_k, d_v, n_heads, dropout, d_model, visual_len, sen_len, fea_v, fea_s, pos):
         super(MultiHeadAttention, self).__init__()
@@ -147,7 +151,7 @@ class MultiHeadAttention(nn.Module):
         self.attention = ScaledDotProductAttention(d_k, dropout)
         self.pos = pos
 
-    def forward(self, v, s, v_len, s_len,mask_v,mask_s):
+    def forward(self, v, s, v_len, s_len, mask_v, mask_s):
         b_size = v.size(0)
         # q: [b_size x len_q x d_model]
         # k: [b_size x len_k x d_model]
@@ -161,8 +165,8 @@ class MultiHeadAttention(nn.Module):
         # context: a tensor of shape [b_size x len_q x n_heads * d_v]
         q_v, k_v, v_v = self.v_getQKV(v, v, v)
         q_s, k_s, v_s = self.s_getQKV(s, s, s)
-        context_v, attn_v = self.attention(q_v, k_s, v_s,attn_mask=mask_s)
-        context_s, attn_s = self.attention(q_s, k_v, v_v,attn_mask=mask_v)
+        context_v, attn_v = self.attention(q_v, k_s, v_s, attn_mask=mask_s)
+        context_s, attn_s = self.attention(q_s, k_v, v_v, attn_mask=mask_v)
         context_v = context_v.transpose(1, 2).contiguous().view(b_size, -1, self.n_heads * self.d_v)
         context_s = context_s.transpose(1, 2).contiguous().view(b_size, -1, self.n_heads * self.d_v)
         # project back to the residual size, outputs: [b_size x len_q x d_model]
@@ -190,13 +194,14 @@ class co_attention(nn.Module):
                                              visual_len=visual_len, sen_len=sen_len, fea_v=fea_v, fea_s=fea_s, pos=pos
                                              )
         self.PoswiseFeedForwardNet_v = PoswiseFeedForwardNet(d_model=d_model, d_ff=1024, dropout=dropout)
-        self.PoswiseFeedForwardNet_s = PoswiseFeedForwardNet(d_model=d_model, d_ff=1024,dropout=dropout)
-    def forward(self, v, s, v_len, s_len,mask_v=None,mask_s=None):
+        self.PoswiseFeedForwardNet_s = PoswiseFeedForwardNet(d_model=d_model, d_ff=1024, dropout=dropout)
+
+    def forward(self, v, s, v_len, s_len, mask_v=None, mask_s=None):
         # for i in range(self.layer_num):
         #     v, s = self.multi_head[i](v, s, v_len, s_len)
         #     v = self.PoswiseFeedForwardNet_v[i](v)
         #     s = self.PoswiseFeedForwardNet_s[i](s)
-        v, s = self.multi_head(v, s, v_len, s_len,mask_v,mask_s)
+        v, s = self.multi_head(v, s, v_len, s_len, mask_v, mask_s)
         v = self.PoswiseFeedForwardNet_v(v)
         s = self.PoswiseFeedForwardNet_s(s)
         return v, s
