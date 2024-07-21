@@ -1,7 +1,7 @@
 # NCSV
 A Multimodal Benchmark for Negative Chinese Short Video Detection with Social Context
 - **Dataset**: The video ID (which can be used to infer the video URL) and corresponding annotations have been released in data directory.
-- **Models**: Our proposed model SV-FEND and other methods are provided in model .
+- **Models**: Our proposed model and other methods are provided in model directory.
 ### Environment 
 ```
 python 3.8.17, pytorch 2.0.1 and cuda 11.8
@@ -12,5 +12,5 @@ python 3.8.17, pytorch 2.0.1 and cuda 11.8
 ### pre-trained model download
 
 ```
-tensorboard --logdir=/root/CKR-Calibrator/output/squeezenet_cifar10/pretrained/runs
+We mainly choose the bilingual Altclip model as the visual and textual feature extractor for Chinese short videos. The specific model selected is [AltCLIP-XLMR-L]([https://drive.google.com/file/d/1Y4qVjRbV8MLIqiVn4gITA5Quk8_XDeer](https://model.baai.ac.cn/model-detail/100075))
 ```
