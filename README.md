@@ -4,7 +4,7 @@ A Multimodal Benchmark for Negative Chinese Short Video Detection with Social Co
 - **Models**: Our proposed model and other methods are provided in model directory.
 ### Environment 
 ```
-python 3.8.17, pytorch 2.0.1 and cuda 11.8
+python 3.8.17, pytorch 2.0.1 and cuda 11.8. Other libs are listed in requirements.txt.
 ```
 
 
