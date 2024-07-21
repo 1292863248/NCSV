@@ -12,5 +12,5 @@ python 3.8.17, pytorch 2.0.1 and cuda 11.8
 ### pre-trained model download
 
 ```
-We mainly choose the bilingual Altclip model as the visual and textual feature extractor for Chinese short videos. The specific model selected is [AltCLIP-XLMR-L]([https://drive.google.com/file/d/1Y4qVjRbV8MLIqiVn4gITA5Quk8_XDeer](https://model.baai.ac.cn/model-detail/100075))
+We mainly choose the bilingual Altclip model as the visual and textual feature extractor for Chinese short videos. The specific model selected is [AltCLIP-XLMR-L](https://model.baai.ac.cn/model-detail/100075))
 ```
