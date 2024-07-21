@@ -1,3 +1,17 @@
-# Pre trained model download
-##AltCLIP
-##bert-base-chinese
+# NCSV: Multimodal Benchmark for Negative Chinese Short Video Detection with Social Context
+
+### quick start
+
+```
+cd script
+./train.sh # generate original model
+./train_up.sh # generate optimized optim
+```
+
+
+
+### open tensorboard
+
+```
+tensorboard --logdir=/root/CKR-Calibrator/output/squeezenet_cifar10/pretrained/runs
+```
